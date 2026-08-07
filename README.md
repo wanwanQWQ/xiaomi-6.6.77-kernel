@@ -1,6 +1,6 @@
-# 小米 / 红米 6.6.77 内核增强版
+# 小米 / 红米 6.6.77 自定义内核
 
-为小米 / 红米 6.6.77 内核设备打造的增强内核：开启 **SYSVIPC** 与完整命名空间，完全兼容原厂预编译模块，专为 [Droidspaces](https://github.com/ravindu644/Droidspaces-OSS) 容器环境适配。
+为小米 / 红米 6.6.77 内核设备打造的自定义内核：开启 **SYSVIPC** 与完整命名空间，完全兼容原厂预编译模块，专为 [Droidspaces](https://github.com/ravindu644/Droidspaces-OSS) 容器环境适配。
 
 由 AI 辅助创作。
 
