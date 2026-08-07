@@ -12,7 +12,6 @@
 - **完整命名空间**：PID / IPC / UTS / Mount / User
 - `DEVTMPFS`、`POSIX_MQUEUE`
 - **原厂模块全兼容**：WiFi、相机、音频、传感器等驱动正常加载
-- 可搭配 [FolkPatch](https://github.com/LyraVoid/FolkPatch) 补丁获取 root
 
 ## 📱 支持设备
 
