@@ -44,7 +44,8 @@ fastboot flash boot_a boot_6.6.77_v33_sysvipc.img
 fastboot reboot
 ```
 
-> 其它机型：先用 `scripts/splice_boot.py` 配合该机型原厂 boot.img 拼接，或使用 AK3 刷机包。
+> 拼接方法适用于任意设备：把任意原厂 boot.img 与 Image 用 `scripts/splice_boot.py` 拼接即可。
+> 仓库的自动拼接使用 `images/stock_boot.img`（当前为 K90）；想为自己的机型生成免拼接镜像，放入该机型原厂 boot.img 后重新构建即可，或直接使用 AK3 刷机包。
 
 ## 💾 刷机与恢复
 
@@ -116,7 +117,7 @@ scripts/
 images/
   boot_6.6.77_v33_sysvipc.img              v33 镜像（fastboot 刷入，MD5 9faf6bcce6116cc05c7902fc6dc01581）
   kernel-6.6.77-ak3.zip                    AK3 刷机包（Recovery / KernelFlasher 刷入）
-  stock_boot.img                           K90 原厂 boot（供自动拼接 / CI 打包）
+  stock_boot.img                           原厂 boot（默认 K90，可替换为任意机型用于自动拼接）
 .github/workflows/build.yml                GitHub Actions 云端构建
 ```
 
