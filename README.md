@@ -67,6 +67,8 @@ fastboot reboot
 
 仓库自带 AK3 刷机包：`images/kernel-6.6.77-ak3.zip`（内含 v33 Image，已配置高通 A/B 设备通用参数）。
 
+✅ 已实测通过：在红米 K90 上刷入并正常开机（root / SYSVIPC / WiFi 均正常）。
+
 **方式一：Recovery 刷入**
 
 ```text
