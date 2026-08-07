@@ -129,6 +129,8 @@ K90 实测结果：SYSVIPC ✅ · 命名空间 ✅ · WiFi（Wi-Fi 6，2401Mbps�
 - [Android Common Kernel](https://android.googlesource.com/kernel/common/) — 内核源码基础
 - [LLVM / Clang](https://llvm.org/) — 交叉编译工具链
 
-## 📄 免责声明
+## 📄 许可证与免责声明
+
+本项目基于 [GPL-2.0](LICENSE) 协议开源（内核本身遵循 GPL-2.0）。
 
 仅供学习研究，刷机可能导致设备变砖、数据丢失或保修失效，请自行评估风险。

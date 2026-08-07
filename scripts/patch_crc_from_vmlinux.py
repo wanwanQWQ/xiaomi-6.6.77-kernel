@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-"""Patch __kcrctab entries in v32 vmlinux to v16 (stock) CRC values.
+"""Patch a freshly built vmlinux's __kcrctab to reference (stock) CRC values.
 
-Locates every __crc_* symbol by the section that CONTAINS its address,
-which also handles the LOCAL __crc_module_layout symbol.
+Usage:
+    patch_crc_from_vmlinux.py <reference_vmlinux> <built_vmlinux> [out_vmlinux]
+
+The reference vmlinux is a kernel build whose exported symbol CRCs match the
+prebuilt vendor modules (for example, a build with the stock configuration).
 """
 import struct
 import subprocess
@@ -72,35 +75,39 @@ def crc_entries(path):
 
 
 def main():
-    v16path = sys.argv[1] if len(sys.argv) > 1 else '/build/out-v16/vmlinux'
-    newpath = sys.argv[2] if len(sys.argv) > 2 else '/build/out-v32/vmlinux'
-    outpath = sys.argv[3] if len(sys.argv) > 3 else '/build/out-v32/vmlinux_patched2'
-    v16 = crc_entries(v16path)
-    v32 = crc_entries(newpath)
-    print('v16 entries:', len(v16), 'new entries:', len(v32))
-    print('module_layout in v16:', v16.get('module_layout'))
-    print('module_layout in new:', v32.get('module_layout'))
+    if len(sys.argv) < 3:
+        print(__doc__)
+        sys.exit(1)
+    ref_path = sys.argv[1]
+    target_path = sys.argv[2]
+    out_path = sys.argv[3] if len(sys.argv) > 3 else target_path + '.patched'
 
-    data = bytearray(open(newpath, 'rb').read())
+    ref = crc_entries(ref_path)
+    target = crc_entries(target_path)
+    print('reference entries:', len(ref), 'target entries:', len(target))
+    print('module_layout in reference:', ref.get('module_layout'))
+    print('module_layout in target:', target.get('module_layout'))
+
+    data = bytearray(open(target_path, 'rb').read())
     changed = 0
-    for name, (pos, old, secname) in v32.items():
-        if name in v16:
-            want = v16[name][1]
+    for name, (pos, old, _) in target.items():
+        if name in ref:
+            want = ref[name][1]
             if want != old:
                 data[pos:pos + 4] = struct.pack('<I', want)
                 changed += 1
     print('changed:', changed)
-    open(outpath, 'wb').write(bytes(data))
+    open(out_path, 'wb').write(bytes(data))
 
     # verify
-    new = bytearray(open(outpath, 'rb').read())
+    new = bytearray(open(out_path, 'rb').read())
     ok = 0
-    for name, (pos, _, _) in v32.items():
-        if name in v16 and struct.unpack('<I', bytes(new[pos:pos + 4]))[0] == v16[name][1]:
+    for name, (pos, _, _) in target.items():
+        if name in ref and struct.unpack('<I', bytes(new[pos:pos + 4]))[0] == ref[name][1]:
             ok += 1
-    print('verify: %d/%d match v16' % (ok, len(v16)))
-    if 'module_layout' in v32:
-        print('module_layout patched to:', hex(struct.unpack('<I', bytes(new[v32['module_layout'][0]:v32['module_layout'][0] + 4]))[0]))
+    print('verify: %d/%d match reference' % (ok, len(ref)))
+    if 'module_layout' in target:
+        print('module_layout patched to:', hex(struct.unpack('<I', bytes(new[target['module_layout'][0]:target['module_layout'][0] + 4]))[0]))
 
 
 if __name__ == '__main__':
