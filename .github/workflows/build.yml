@@ -26,6 +26,9 @@ jobs:
 
       - name: Install toolchain
         run: |
+          wget -qO /tmp/llvm.sh https://apt.llvm.org/llvm.sh
+          chmod +x /tmp/llvm.sh
+          sudo /tmp/llvm.sh 18
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             clang-18 lld-18 llvm-18 \
