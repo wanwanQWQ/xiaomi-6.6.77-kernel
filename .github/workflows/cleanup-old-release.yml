@@ -1,0 +1,19 @@
+name: Cleanup Old Release
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/cleanup-old-release.yml'
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Delete old release and tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete kernel-6.6.77-b86d392df13c69fde0cd84a8da6df2c4ddb6b988 --yes --cleanup-tag || echo "already gone"
