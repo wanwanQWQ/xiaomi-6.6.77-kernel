@@ -25,7 +25,7 @@
 - PID / IPC / UTS / Mount / User 命名空间
 - DEVTMPFS、POSIX_MQUEUE
 - 原厂模块全兼容（WiFi、相机、音频等）
-- 可搭配 KernelSU / FolkSU 获取 root
+- 可搭配 [FolkPatch](https://github.com/LyraVoid/FolkPatch) 补丁获取 root
 
 ## 关键修复
 
@@ -86,6 +86,10 @@ fastboot flash boot_a boot_custom.img
 fastboot reboot
 ```
 
+## 获取 root
+
+使用 [FolkPatch](https://github.com/LyraVoid/FolkPatch)（基于 KernelPatch 的 Root 管理工具）对 `images/` 下的 boot 镜像打补丁，刷入后即可获得 root（已实测）。
+
 ## 刷机
 
 ```bash
@@ -117,7 +121,8 @@ K90 实测：SYSVIPC ✅、命名空间 ✅、WiFi（Wi-Fi 6）✅、KernelSU ro
 
 - [Droidspaces](https://github.com/ravindu644/Droidspaces-OSS) — 轻量级容器运行时（作者 [ravindu644](https://github.com/ravindu644)），本项目即为其适配
 - [Android Common Kernel](https://android.googlesource.com/kernel/common/)（[GitHub 镜像](https://github.com/aosp-mirror/kernel_common)）— 内核源码基础
-- [KernelSU](https://github.com/tiann/KernelSU) / FolkSU — root 方案
+- [FolkPatch](https://github.com/LyraVoid/FolkPatch) — Root 补丁与模块管理工具（作者 [LyraVoid](https://github.com/LyraVoid)）
+- [KernelSU](https://github.com/tiann/KernelSU) / [KernelPatch](https://github.com/bmax121/KernelPatch) — root 生态
 - [LLVM / Clang](https://llvm.org/) — 交叉编译工具链
 - 所有为 Linux、Android 开源生态做出贡献的开发者
 
