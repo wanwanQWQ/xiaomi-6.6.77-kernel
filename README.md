@@ -6,14 +6,19 @@
 
 ![Build](https://github.com/wanwanQWQ/xiaomi-6.6.77-kernel/actions/workflows/build.yml/badge.svg)
 
-## 📱 已测试设备
+## 📋 目录
 
-| 设备 | 代号 | 系统版本 | 状态 |
-| --- | --- | --- | --- |
-| 红米 K90 | `annibale` | OS3.0.307.0.WPKCNXM | ✅ 完整验证 |
-| 红米 K80 Pro | - | 6.6.77 | ✅ 测试通过 |
-
-同一 6.6.77 内核版本的小米 / 红米机型基本可用。
+- [特性](#-特性)
+- [支持设备](#-支持设备)
+- [快速开始（云端构建）](#-快速开始云端构建)
+- [刷机与恢复](#-刷机与恢复)
+- [技术要点](#-技术要点)
+- [仓库结构](#-仓库结构)
+- [本地构建](#-本地构建)
+- [验证清单](#-验证清单)
+- [常见问题](#-常见问题)
+- [开源致谢](#-开源致谢)
+- [免责声明](#-免责声明)
 
 ## ✨ 特性
 
@@ -22,7 +27,15 @@
 - `DEVTMPFS`、`POSIX_MQUEUE`
 - **原厂模块全兼容**：WiFi、相机、音频、传感器等驱动正常加载
 - 可搭配 [FolkPatch](https://github.com/LyraVoid/FolkPatch) 补丁获取 root
-- 适配 [Droidspaces](https://github.com/ravindu644/Droidspaces-OSS)
+
+## 📱 支持设备
+
+| 设备 | 代号 | 系统版本 | 状态 |
+| --- | --- | --- | --- |
+| 红米 K90 | `annibale` | OS3.0.307.0.WPKCNXM | ✅ 完整验证 |
+| 红米 K80 Pro | - | 6.6.77 | ✅ 测试通过 |
+
+同一 6.6.77 内核版本的小米 / 红米机型基本可用。
 
 ## 🚀 快速开始（云端构建）
 
@@ -45,7 +58,22 @@ fastboot flash boot_a boot_custom.img
 fastboot reboot
 ```
 
-## ⚙️ 关键修复
+## 💾 刷机与恢复
+
+```bash
+# 查看当前槽位（期望 a）
+fastboot getvar current-slot
+
+# 刷入镜像
+fastboot flash boot_a boot_custom.img
+fastboot reboot
+```
+
+**恢复方法**：长按电源 + 音量下进入 fastboot，重新刷回原厂 boot.img 即可。
+
+> ⚠️ 刷机有风险，请先备份数据，确认设备型号与内核版本后再操作。
+
+## ⚙️ 技术要点
 
 直接把 `CONFIG_SYSVIPC` 打开并不能正常使用，需要两个关键修复：
 
@@ -95,9 +123,19 @@ su -c id                            # root（已刷 FolkPatch 时）
 
 K90 实测结果：SYSVIPC ✅ · 命名空间 ✅ · WiFi（Wi-Fi 6，2401Mbps）✅ · root ✅。
 
-## ⚠️ 其它机型适配
+## ❓ 常见问题
 
-若遇到模块校验失败（`disagrees about version of symbol`），说明该机型原厂模块 CRC 与参考表不同。用该机型可正常开机的内核导出表重新生成 CRC 表（修改 `patch_crc_from_vmlinux.py` 的参考路径后重新构建）。
+**卡在 fastboot / 模块校验失败**
+
+报错 `disagrees about version of symbol` 说明该机型原厂模块 CRC 与参考表不同。用该机型可正常开机的内核导出表重新生成 CRC 表（修改 `patch_crc_from_vmlinux.py` 的参考路径后重新构建）。
+
+**卡开机画面**
+
+多为 ABI 错位或其它硬件差异，建议抓取 pstore / last_kmsg 日志分析。
+
+**WiFi 异常**
+
+确认原厂 WiFi 驱动模块（vendor_dlkm）未被修改或替换，必要时重新刷入原厂模块分区。
 
 ## 🤝 开源致谢
 
