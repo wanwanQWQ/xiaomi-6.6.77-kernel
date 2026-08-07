@@ -1,0 +1,13 @@
+diff --git a/ipc/shm.c b/ipc/shm.c
+index 576a543b7..2d9e4047e 100644
+--- a/ipc/shm.c
++++ b/ipc/shm.c
+@@ -150,7 +150,7 @@ static int __init ipc_ns_init(void)
+ 	return 0;
+ }
+ 
+-pure_initcall(ipc_ns_init);
++device_initcall(ipc_ns_init); /* moved from pure_initcall for device boot compatibility */
+ 
+ void __init shm_init(void)
+ {

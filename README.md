@@ -62,6 +62,7 @@ SYSVIPC 会在 `struct task_struct` 中部插入两个字段，导致原厂驱�
 ```text
 patches/
   sched-sysvipc-fields-to-end.patch        task_struct 布局补丁
+  ipc-ns-device-initcall.patch             IPC 命名空间初始化时序补丁
 scripts/
   build.sh                                 本地完整构建脚本
   patch_crc_from_vmlinux.py                从参考内核生成/修复 CRC 表

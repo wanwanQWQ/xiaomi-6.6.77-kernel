@@ -50,10 +50,11 @@ jobs:
           git fetch --depth 1 origin 4a507830d8909940399dbc711cc4d0bf54f4069b
           git checkout FETCH_HEAD
 
-      - name: Apply task_struct patch
+      - name: Apply kernel patches
         run: |
           cd kernel
           git apply "$GITHUB_WORKSPACE/patches/sched-sysvipc-fields-to-end.patch"
+          git apply "$GITHUB_WORKSPACE/patches/ipc-ns-device-initcall.patch"
 
       - name: Configure kernel
         run: |

@@ -21,6 +21,15 @@ else
   echo "patch applied"
 fi
 
+echo "=== apply ipc init patch ==="
+if grep -q 'device_initcall(ipc_ns_init)' ipc/shm.c; then
+  echo "ipc/shm.c already patched, skip"
+else
+  git apply --check "$SCRIPT_DIR/../patches/ipc-ns-device-initcall.patch"
+  git apply "$SCRIPT_DIR/../patches/ipc-ns-device-initcall.patch"
+  echo "ipc patch applied"
+fi
+
 echo "=== config (SYSVIPC + namespaces) ==="
 make ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- O=/build/out-v33 gki_defconfig > /build/defconfig_v33.log 2>&1
 ./scripts/config --file /build/out-v33/.config \
