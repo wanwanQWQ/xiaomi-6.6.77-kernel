@@ -22,6 +22,11 @@
 
 同一 6.6.77 内核版本的小米 / 红米机型基本可用。
 
+## 📥 下载
+
+- 预编译镜像 / 刷机包：查看 [Releases](https://github.com/wanwanQWQ/xiaomi-6.6.77-kernel/releases)
+- 最新构建产物：仓库 **Actions** 页面的 `kernel-Image-6.6.77` 工件
+
 ## 🚀 快速开始（云端构建）
 
 无需本地环境，GitHub 云端自动完成：拉取源码 → 打补丁 → 配置 → 编译 → CRC 修复 → 模拟器验证。
