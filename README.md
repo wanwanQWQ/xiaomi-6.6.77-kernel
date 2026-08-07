@@ -58,6 +58,32 @@ fastboot reboot
 
 > ⚠️ 刷机有风险，请先备份数据，确认设备型号与内核版本后再操作。
 
+## 📦 AnyKernel3 刷入（Recovery / KernelFlasher）
+
+仓库自带 AK3 刷机包：`images/kernel-6.6.77-ak3.zip`（内含 v33 Image，已配置高通 A/B 设备通用参数）。
+
+**方式一：Recovery 刷入**
+
+```text
+1. 进入 TWRP / OrangeFox 等 Recovery
+2. Install → 选择 kernel-6.6.77-ak3.zip
+3. 刷入完成后重启
+```
+
+**方式二：KernelFlasher 应用**
+
+```text
+1. 安装 KernelFlasher
+2. Flash → 选择 kernel-6.6.77-ak3.zip
+3. 等待刷入完成并重启
+```
+
+> 提示：
+> - 需要已解锁 Bootloader
+> - GKI 机型可能没有可用的 TWRP，优先使用 KernelFlasher 或 fastboot 方式
+> - AK3 会自动按当前槽位刷入 boot_a / boot_b
+> - 自制刷机包：下载 [AnyKernel3](https://github.com/osm0sis/AnyKernel3) 模板，把 `Image` 放入根目录，参考 `scripts/ak3_anykernel.sh` 修改配置后打包
+
 ## ⚙️ 技术要点
 
 直接把 `CONFIG_SYSVIPC` 打开并不能正常使用，需要两个关键修复：
@@ -81,8 +107,10 @@ scripts/
   patch_crc_table.py                       云端构建用 CRC 修复工具
   crc_table_stock.txt                      原厂 CRC 参考表
   splice_boot.py                           Image 与 boot.img 拼接工具
+  ak3_anykernel.sh                         AK3 定制配置（自制刷机包参考）
 images/
-  boot_6.6.77_v33_sysvipc.img              v33 镜像（MD5 9faf6bcce6116cc05c7902fc6dc01581）
+  boot_6.6.77_v33_sysvipc.img              v33 镜像（fastboot 刷入，MD5 9faf6bcce6116cc05c7902fc6dc01581）
+  kernel-6.6.77-ak3.zip                    AK3 刷机包（Recovery / KernelFlasher 刷入）
 .github/workflows/build.yml                GitHub Actions 云端构建
 ```
 
