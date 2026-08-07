@@ -1,7 +1,7 @@
 name: Build Kernel
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: build-${{ github.ref }}
@@ -112,3 +112,21 @@ jobs:
             kernel/out/System.map
             kernel/out/.config
           retention-days: 30
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: kernel-6.6.77-${{ github.sha }}
+          name: 6.6.77 自定义内核 ${{ github.sha }}
+          body: |
+            云端自动构建产物（SYSVIPC + 完整命名空间，兼容原厂模块）
+
+            - `Image`：内核镜像。下载后用原厂 boot.img 拼接（`scripts/splice_boot.py`）再 fastboot 刷入
+            - `System.map`：调试用符号表
+            - `.config`：本次构建的内核配置
+
+            刷入方法见仓库 README。
+          files: |
+            kernel/out/arch/arm64/boot/Image
+            kernel/out/System.map
+            kernel/out/.config

@@ -24,7 +24,7 @@
 
 ## 📥 下载
 
-- 预编译镜像 / 刷机包：查看 [Releases](https://github.com/wanwanQWQ/xiaomi-6.6.77-kernel/releases)
+- 预编译镜像 / 刷机包：查看 [Releases](https://github.com/wanwanQWQ/xiaomi-6.6.77-kernel/releases)（每次云端构建成功后自动发布）
 - 最新构建产物：仓库 **Actions** 页面的 `kernel-Image-6.6.77` 工件
 
 ## 🚀 快速开始（云端构建）
