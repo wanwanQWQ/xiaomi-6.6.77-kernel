@@ -84,25 +84,9 @@ fastboot reboot
 > - AK3 会自动按当前槽位刷入 boot_a / boot_b
 > - 自制刷机包：下载 [AnyKernel3](https://github.com/osm0sis/AnyKernel3) 模板，把 `Image` 放入根目录，参考 `scripts/ak3_anykernel.sh` 修改配置后打包
 
-## 🔧 KernelSU 刷入
+## 🔧 KernelSU / FolkPatch（root 版镜像）
 
-使用 KernelSU Manager 对镜像打补丁后刷入，可获得 root 权限：
-
-```text
-1. 安装 KernelSU Manager
-2. 打开 Manager → 安装 → 选择并修补一个镜像文件
-3. 选择 images/boot_6.6.77_v33_sysvipc.img
-4. 生成 patched boot 镜像
-5. 刷入生成的新镜像
-```
-
-```bash
-adb reboot bootloader
-fastboot flash boot_a ksu-patched-boot.img
-fastboot reboot
-```
-
-> 提示：KernelSU 与 [FolkPatch](https://github.com/LyraVoid/FolkPatch) 均为 KernelPatch 系方案，任选其一即可获得 root。
+需要 root 时，用 [FolkPatch](https://github.com/LyraVoid/FolkPatch)（KernelPatch 系，已实测）或 KernelSU 对 `images/boot_6.6.77_v33_sysvipc.img` 打补丁，得到 patched 镜像后，用上文 fastboot 命令直接刷入即可（与普通镜像刷法一致）。
 
 ## ⚙️ 技术要点
 
