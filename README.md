@@ -84,10 +84,6 @@ bash /path/to/scripts/build.sh
 
 脚本自动完成：打补丁 → 配置 → 编译 → CRC 表修复 → QEMU 模块验证（可选）→ 打包 boot 镜像。
 
-## 🔑 获取 root
-
-使用 [FolkPatch](https://github.com/LyraVoid/FolkPatch)（基于 KernelPatch 的 Root 管理工具）对 `images/` 下的 boot 镜像打补丁，刷入后即可获得 root（已实测）。
-
 ## ✅ 验证清单
 
 ```bash
