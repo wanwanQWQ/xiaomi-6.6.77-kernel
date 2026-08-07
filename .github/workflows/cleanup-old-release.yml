@@ -1,0 +1,32 @@
+name: Cleanup Old Release
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/cleanup-old-release.yml'
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Delete old release and tag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = 'kernel-6.6.77-6011a535ba70a6209a4a22810ee4575dd0d462e7';
+            const { owner, repo } = context.repo;
+            try {
+              const rel = await github.rest.repos.getReleaseByTag({ owner, repo, tag });
+              await github.rest.repos.deleteRelease({ owner, repo, release_id: rel.data.id });
+              await github.rest.git.deleteRef({ owner, repo, ref: `tags/${tag}` });
+              console.log('old release and tag deleted');
+            } catch (e) {
+              if (e.status === 404) { console.log('already gone'); }
+              else {
+                console.log('status:', e.status, 'message:', e.message);
+                core.setFailed('delete failed: ' + e.message);
+              }
+            }
