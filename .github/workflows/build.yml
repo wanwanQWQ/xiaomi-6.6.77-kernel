@@ -30,7 +30,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             clang-18 lld-18 llvm-18 \
             gcc-aarch64-linux-gnu \
-            bc bison flex libssl-dev libelf-dev cpio qemu-system-arm
+            bc bison flex libssl-dev libelf-dev cpio qemu-system-arm zip unzip
           for tool in clang clang++ clang-cpp ld.lld lld llvm-ar llvm-nm \
                       llvm-objcopy llvm-objdump llvm-readelf llvm-strip \
                       llvm-strings llvm-size llvm-ranlib llvm-profdata \
@@ -87,6 +87,17 @@ jobs:
           make ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- O=out Image
           ls -la out/arch/arm64/boot/Image
 
+      - name: Build AK3 flashable zip
+        run: |
+          curl -sL https://github.com/osm0sis/AnyKernel3/archive/refs/heads/master.zip -o /tmp/ak3.zip
+          rm -rf /tmp/ak3 && mkdir -p /tmp/ak3 && cd /tmp/ak3
+          unzip -q /tmp/ak3.zip
+          cd AnyKernel3-master
+          cp "$GITHUB_WORKSPACE/scripts/ak3_anykernel.sh" anykernel.sh
+          cp "$GITHUB_WORKSPACE/kernel/out/arch/arm64/boot/Image" Image
+          zip -r9 "$GITHUB_WORKSPACE/kernel/out/kernel-6.6.77-ak3.zip" . -x '.github/*'
+          ls -la "$GITHUB_WORKSPACE/kernel/out/kernel-6.6.77-ak3.zip"
+
       - name: QEMU sanity boot (informational)
         continue-on-error: true
         run: |
@@ -111,6 +122,7 @@ jobs:
             kernel/out/arch/arm64/boot/Image
             kernel/out/System.map
             kernel/out/.config
+            kernel/out/kernel-6.6.77-ak3.zip
           retention-days: 30
 
       - name: Create GitHub Release
@@ -122,11 +134,13 @@ jobs:
             云端自动构建产物（SYSVIPC + 完整命名空间，兼容原厂模块）
 
             - `Image`：内核镜像。下载后用原厂 boot.img 拼接（`scripts/splice_boot.py`）再 fastboot 刷入
+            - `kernel-6.6.77-ak3.zip`：AK3 刷机包，可在 TWRP / OrangeFox / KernelFlasher 中直接刷入
             - `System.map`：调试用符号表
             - `.config`：本次构建的内核配置
 
             刷入方法见仓库 README。
           files: |
             kernel/out/arch/arm64/boot/Image
+            kernel/out/kernel-6.6.77-ak3.zip
             kernel/out/System.map
             kernel/out/.config
