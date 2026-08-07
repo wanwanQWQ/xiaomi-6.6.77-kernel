@@ -84,6 +84,26 @@ fastboot reboot
 > - AK3 会自动按当前槽位刷入 boot_a / boot_b
 > - 自制刷机包：下载 [AnyKernel3](https://github.com/osm0sis/AnyKernel3) 模板，把 `Image` 放入根目录，参考 `scripts/ak3_anykernel.sh` 修改配置后打包
 
+## 🔧 KernelSU 刷入
+
+使用 KernelSU Manager 对镜像打补丁后刷入，可获得 root 权限：
+
+```text
+1. 安装 KernelSU Manager
+2. 打开 Manager → 安装 → 选择并修补一个镜像文件
+3. 选择 images/boot_6.6.77_v33_sysvipc.img
+4. 生成 patched boot 镜像
+5. 刷入生成的新镜像
+```
+
+```bash
+adb reboot bootloader
+fastboot flash boot_a ksu-patched-boot.img
+fastboot reboot
+```
+
+> 提示：KernelSU 与 [FolkPatch](https://github.com/LyraVoid/FolkPatch) 均为 KernelPatch 系方案，任选其一即可获得 root。
+
 ## ⚙️ 技术要点
 
 直接把 `CONFIG_SYSVIPC` 打开并不能正常使用，需要两个关键修复：
@@ -155,6 +175,8 @@ K90 实测结果：SYSVIPC ✅ · 命名空间 ✅ · WiFi（Wi-Fi 6，2401Mbps�
 - [Droidspaces](https://github.com/ravindu644/Droidspaces-OSS) — 轻量级容器运行时
 - [FolkPatch](https://github.com/LyraVoid/FolkPatch) / [KernelSU](https://github.com/tiann/KernelSU) — root 补丁与模块管理生态
 - [Android Common Kernel](https://android.googlesource.com/kernel/common/) — 内核源码基础
+- [AnyKernel3](https://github.com/osm0sis/AnyKernel3) — AK3 刷机模板
+- [KernelFlasher](https://github.com/capntrips/KernelFlasher) — 内核刷写工具
 - [LLVM / Clang](https://llvm.org/) — 交叉编译工具链
 
 ## 📄 许可证与免责声明
