@@ -20,7 +20,7 @@
 | 红米 K90 | `annibale` | OS3.0.307.0.WPKCNXM | ✅ 完整验证 |
 | 红米 K80 Pro | - | 6.6.77 | ✅ 测试通过 |
 
-同一 6.6.77 内核版本的小米 / 红米机型基本可用。
+同一 6.6.77 内核版本的小米 / 红米机型基本可用（已实测 K90 与 K80 Pro）。`images/boot_6.6.77_v33_sysvipc.img` 可直接分享给他人刷入，不止 K90 可用。
 
 ## 📥 下载
 
@@ -46,6 +46,7 @@ fastboot reboot
 
 > 拼接方法适用于任意设备：把任意原厂 boot.img 与 Image 用 `scripts/splice_boot.py` 拼接即可。
 > 仓库的自动拼接使用 `images/stock_boot.img`（当前为 K90）；想为自己的机型生成免拼接镜像，放入该机型原厂 boot.img 后重新构建即可，或直接使用 AK3 刷机包。
+> 预拼接好的 `boot_6.6.77_v33_sysvipc.img` 可以直接发给其他用户刷入（不止 K90）。
 
 ## 💾 刷机与恢复
 
