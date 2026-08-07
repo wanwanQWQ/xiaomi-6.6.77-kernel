@@ -37,15 +37,15 @@
 
 ```text
 patches/
-  0001-sched-sysvipc-fields-to-end.patch   task_struct 布局补丁
+  sched-sysvipc-fields-to-end.patch        task_struct 布局补丁
 scripts/
-  kbuild_v33_schedmove.sh                  完整构建脚本
-  kbuild_patch_crc2.py                     CRC 表修复工具
+  build.sh                                 完整构建脚本
+  patch_crc_from_vmlinux.py                本地版 CRC 表修复（从参考 vmlinux 生成）
   patch_crc_table.py                       云端构建用 CRC 表修复工具
-  crc_table_v16.txt                        原厂 CRC 参考表（16134 个符号）
+  crc_table_stock.txt                      原厂 CRC 参考表（16134 个符号）
   splice_boot.py                           把 Image 拼回原厂 boot.img 的工具
 images/
-  boot_6.6.77_K90_v33_sysvipc.img          K90 镜像（MD5 9faf6bcce6116cc05c7902fc6dc01581）
+  boot_6.6.77_v33_sysvipc.img              v33 镜像（K90 实测，MD5 9faf6bcce6116cc05c7902fc6dc01581）
 .github/workflows/build.yml                GitHub Actions 云端构建
 ```
 
@@ -55,7 +55,7 @@ images/
 
 ```bash
 cd /build/common
-bash /path/to/scripts/kbuild_v33_schedmove.sh
+bash /path/to/scripts/build.sh
 ```
 
 脚本自动完成：打补丁 → 配置（SYSVIPC + 命名空间）→ 编译 → CRC 表修复 → QEMU 模块验证 → 打包 boot 镜像。
@@ -87,7 +87,7 @@ fastboot reboot
 ```bash
 adb reboot bootloader
 fastboot getvar current-slot        # 期望 a
-fastboot flash boot_a images/boot_6.6.77_K90_v33_sysvipc.img
+fastboot flash boot_a images/boot_6.6.77_v33_sysvipc.img
 fastboot reboot
 ```
 
@@ -105,7 +105,7 @@ K90 实测：SYSVIPC ✅、命名空间 ✅、WiFi（Wi-Fi 6）✅、KernelSU ro
 
 ## 其它机型适配
 
-若遇到模块校验失败（`disagrees about version of symbol`），用该机型可正常开机的内核导出表重新生成 CRC 表（修改 `kbuild_patch_crc2.py` 中的参考路径后重新构建）。
+若遇到模块校验失败（`disagrees about version of symbol`），用该机型可正常开机的内核导出表重新生成 CRC 表（修改 `patch_crc_from_vmlinux.py` 中的参考路径后重新构建）。
 
 ## 免责声明
 

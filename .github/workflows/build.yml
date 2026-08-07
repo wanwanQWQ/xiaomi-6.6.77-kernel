@@ -36,7 +36,7 @@ jobs:
       - name: Apply task_struct patch
         run: |
           cd kernel
-          git apply "$GITHUB_WORKSPACE/patches/0001-sched-sysvipc-fields-to-end.patch"
+          git apply "$GITHUB_WORKSPACE/patches/sched-sysvipc-fields-to-end.patch"
 
       - name: Configure kernel
         run: |
@@ -66,7 +66,7 @@ jobs:
         run: |
           python3 "$GITHUB_WORKSPACE/scripts/patch_crc_table.py" \
             kernel/out/vmlinux \
-            "$GITHUB_WORKSPACE/scripts/crc_table_v16.txt" \
+            "$GITHUB_WORKSPACE/scripts/crc_table_stock.txt" \
             kernel/out/vmlinux_patched
           cp kernel/out/vmlinux_patched kernel/out/vmlinux
           cd kernel
