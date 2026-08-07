@@ -84,10 +84,6 @@ fastboot reboot
 > - AK3 会自动按当前槽位刷入 boot_a / boot_b
 > - 自制刷机包：下载 [AnyKernel3](https://github.com/osm0sis/AnyKernel3) 模板，把 `Image` 放入根目录，参考 `scripts/ak3_anykernel.sh` 修改配置后打包
 
-## 🔧 KernelSU / FolkPatch（root 版镜像）
-
-需要 root 时，用 [FolkPatch](https://github.com/LyraVoid/FolkPatch)（KernelPatch 系，已实测）或 KernelSU 对 `images/boot_6.6.77_v33_sysvipc.img` 打补丁，得到 patched 镜像后，用上文 fastboot 命令直接刷入即可（与普通镜像刷法一致）。
-
 ## ⚙️ 技术要点
 
 直接把 `CONFIG_SYSVIPC` 打开并不能正常使用，需要两个关键修复：
