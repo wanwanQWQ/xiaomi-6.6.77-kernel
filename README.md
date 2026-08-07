@@ -32,21 +32,19 @@
 无需本地环境，GitHub 云端自动完成：拉取源码 → 打补丁 → 配置 → 编译 → CRC 修复 → 模拟器验证。
 
 ```text
-1. 打开仓库 Actions 页面
-2. 选择 Build Kernel → Run workflow
-3. 约 1～2 小时后在 Artifacts 下载 kernel-Image-6.6.77
-4. 解压得到 Image，拼接原厂 boot.img 后刷入
+1. 打开仓库 [Releases](https://github.com/wanwanQWQ/xiaomi-6.6.77-kernel/releases) 页面
+2. 下载 `boot_6.6.77_v33_sysvipc.img`（已拼接好，K90 直接可用）
+3. 刷入（无需自己拼接）
 ```
 
 ```bash
-# 拼接（把 Image 放回原厂 boot 镜像）
-python3 scripts/splice_boot.py 原厂boot.img Image boot_custom.img
-
 # 刷入
 adb reboot bootloader
-fastboot flash boot_a boot_custom.img
+fastboot flash boot_a boot_6.6.77_v33_sysvipc.img
 fastboot reboot
 ```
+
+> 其它机型：先用 `scripts/splice_boot.py` 配合该机型原厂 boot.img 拼接，或使用 AK3 刷机包。
 
 ## 💾 刷机与恢复
 
@@ -118,6 +116,7 @@ scripts/
 images/
   boot_6.6.77_v33_sysvipc.img              v33 镜像（fastboot 刷入，MD5 9faf6bcce6116cc05c7902fc6dc01581）
   kernel-6.6.77-ak3.zip                    AK3 刷机包（Recovery / KernelFlasher 刷入）
+  stock_boot.img                           K90 原厂 boot（供自动拼接 / CI 打包）
 .github/workflows/build.yml                GitHub Actions 云端构建
 ```
 
