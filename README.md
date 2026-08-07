@@ -33,7 +33,7 @@
 
 ```text
 1. 打开仓库 [Releases](https://github.com/wanwanQWQ/xiaomi-6.6.77-kernel/releases) 页面
-2. 下载 `boot_6.6.77_v33_sysvipc.img`（已拼接好，K90 直接可用）
+2. 下载 `boot_6.6.77_v33_sysvipc.img`（已拼接好，直接可用，不止 K90）
 3. 刷入（无需自己拼接）
 ```
 
