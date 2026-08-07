@@ -1,6 +1,6 @@
 # 小米 / 红米 6.6.77 内核增强版
 
-基于 Android Common Kernel（ACK）6.6.77（commit `4a507830d890`）构建，开启 **SYSVIPC** 与完整命名空间，兼容原厂预编译模块，适配 **Droidspaces**。
+基于 Android Common Kernel（ACK）6.6.77（commit `4a507830d890`）构建，开启 **SYSVIPC** 与完整命名空间，兼容原厂预编译模块，适配 [Droidspaces](https://github.com/ravindu644/Droidspaces-OSS)。
 
 由 AI 辅助创作。
 
@@ -14,6 +14,10 @@
 - 红米 K80 Pro ✅
 
 同一 6.6.77 内核版本的小米 / 红米机型基本可用。
+
+## 关于 Droidspaces
+
+本项目专为 [Droidspaces](https://github.com/ravindu644/Droidspaces-OSS) 适配。Droidspaces 是一款轻量级、类似 LXC 的容器运行时，可在 Android / Linux 上原生运行完整 Linux 发行版，零性能损耗。
 
 ## 特性
 
@@ -106,6 +110,16 @@ K90 实测：SYSVIPC ✅、命名空间 ✅、WiFi（Wi-Fi 6）✅、KernelSU ro
 ## 其它机型适配
 
 若遇到模块校验失败（`disagrees about version of symbol`），用该机型可正常开机的内核导出表重新生成 CRC 表（修改 `patch_crc_from_vmlinux.py` 中的参考路径后重新构建）。
+
+## 开源致谢
+
+感谢以下开源项目与社区：
+
+- [Droidspaces](https://github.com/ravindu644/Droidspaces-OSS) — 轻量级容器运行时（作者 [ravindu644](https://github.com/ravindu644)），本项目即为其适配
+- [Android Common Kernel](https://android.googlesource.com/kernel/common/)（[GitHub 镜像](https://github.com/aosp-mirror/kernel_common)）— 内核源码基础
+- [KernelSU](https://github.com/tiann/KernelSU) / FolkSU — root 方案
+- [LLVM / Clang](https://llvm.org/) — 交叉编译工具链
+- 所有为 Linux、Android 开源生态做出贡献的开发者
 
 ## 免责声明
 
