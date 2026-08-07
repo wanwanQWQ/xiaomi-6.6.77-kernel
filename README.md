@@ -37,8 +37,12 @@ patches/
 scripts/
   kbuild_v33_schedmove.sh                  完整构建脚本
   kbuild_patch_crc2.py                     CRC 表修复工具
+  patch_crc_table.py                       云端构建用 CRC 表修复工具
+  crc_table_v16.txt                        原厂 CRC 参考表（16134 个符号）
+  splice_boot.py                           把 Image 拼回原厂 boot.img 的工具
 images/
   boot_6.6.77_K90_v33_sysvipc.img          K90 镜像（MD5 9faf6bcce6116cc05c7902fc6dc01581）
+.github/workflows/build.yml                GitHub Actions 云端构建
 ```
 
 ## 构建
@@ -51,6 +55,30 @@ bash /path/to/scripts/kbuild_v33_schedmove.sh
 ```
 
 脚本自动完成：打补丁 → 配置（SYSVIPC + 命名空间）→ 编译 → CRC 表修复 → QEMU 模块验证 → 打包 boot 镜像。
+
+## GitHub Actions 云端构建
+
+不需要本地环境，直接在 GitHub 云端编译：
+
+1. 打开仓库的 **Actions** 页面
+2. 左侧选择 **Build Kernel**，点击 **Run workflow**
+3. 等待约 1～2 小时（免费公共仓库，无需任何费用）
+4. 构建完成后在 **Artifacts** 下载 `kernel-Image-6.6.77`
+5. 解压得到 `Image`，用原厂 boot.img 拼接成可刷入的镜像：
+
+```bash
+python3 scripts/splice_boot.py 原厂boot.img Image boot_custom.img
+```
+
+6. 刷入：
+
+```bash
+adb reboot bootloader
+fastboot flash boot_a boot_custom.img
+fastboot reboot
+```
+
+云端构建内容与本地 v33 完全一致：同版本源码（commit `4a507830d890`）→ 同补丁 → 同配置 → 同 CRC 表修复。
 
 ## 刷机
 

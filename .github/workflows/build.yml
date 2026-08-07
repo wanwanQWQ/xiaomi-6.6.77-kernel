@@ -1,0 +1,93 @@
+name: Build Kernel
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            clang-18 lld-18 llvm-18 \
+            gcc-aarch64-linux-gnu \
+            bc bison flex libssl-dev libelf-dev cpio qemu-system-arm
+          for tool in clang clang++ clang-cpp ld.lld lld llvm-ar llvm-nm \
+                      llvm-objcopy llvm-objdump llvm-readelf llvm-strip \
+                      llvm-strings llvm-size llvm-ranlib llvm-profdata \
+                      llvm-cxxfilt; do
+            sudo ln -sf /usr/bin/${tool}-18 /usr/local/bin/${tool}
+          done
+          clang --version | head -1
+
+      - name: Fetch kernel source (ACK 6.6.77, commit 4a507830d890)
+        run: |
+          git init kernel
+          cd kernel
+          git remote add origin https://github.com/aosp-mirror/kernel_common.git
+          git fetch --depth 1 origin 4a507830d8909940399dbc711cc4d0bf54f4069b
+          git checkout FETCH_HEAD
+
+      - name: Apply task_struct patch
+        run: |
+          cd kernel
+          git apply "$GITHUB_WORKSPACE/patches/0001-sched-sysvipc-fields-to-end.patch"
+
+      - name: Configure kernel
+        run: |
+          cd kernel
+          make ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- O=out gki_defconfig
+          ./scripts/config --file out/.config \
+            -d CONFIG_TRIM_UNUSED_KSYMS \
+            --set-str CONFIG_LOCALVERSION "-android15-8-4k" \
+            -d CONFIG_MODULE_SIG_PROTECT \
+            -e CONFIG_MODULE_ALLOW_MISSING_NAMESPACE_IMPORTS \
+            -e CONFIG_PID_NS \
+            -e CONFIG_DEVTMPFS \
+            -e CONFIG_POSIX_MQUEUE \
+            -e CONFIG_IPC_NS \
+            -e CONFIG_USER_NS \
+            -e CONFIG_SYSVIPC \
+            -e CONFIG_SYSVIPC_SYSCTL
+          make ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- O=out olddefconfig
+          grep -E 'CONFIG_(SYSVIPC|MODVERSIONS)' out/.config
+
+      - name: Build Image
+        run: |
+          cd kernel
+          make ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- O=out -j$(nproc) Image
+
+      - name: Patch CRC table to stock values
+        run: |
+          python3 "$GITHUB_WORKSPACE/scripts/patch_crc_table.py" \
+            kernel/out/vmlinux \
+            "$GITHUB_WORKSPACE/scripts/crc_table_v16.txt" \
+            kernel/out/vmlinux_patched
+          cp kernel/out/vmlinux_patched kernel/out/vmlinux
+          cd kernel
+          make ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- O=out Image
+          ls -la out/arch/arm64/boot/Image
+
+      - name: QEMU sanity boot
+        run: |
+          timeout 30 qemu-system-aarch64 -M virt -cpu max -m 1G \
+            -kernel kernel/out/arch/arm64/boot/Image -nographic -no-reboot \
+            -append "console=ttyAMA0 loglevel=8 panic=-1" > /tmp/qemu.log 2>&1 || true
+          grep -q "Linux version 6.6.77-android15-8-4k" /tmp/qemu.log \
+            && echo "QEMU boot OK" \
+            || { echo "QEMU boot failed:"; tail -30 /tmp/qemu.log; exit 1; }
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernel-Image-6.6.77
+          path: |
+            kernel/out/arch/arm64/boot/Image
+            kernel/out/System.map
+            kernel/out/.config
+          retention-days: 30
