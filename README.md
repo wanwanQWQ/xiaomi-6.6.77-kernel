@@ -20,76 +20,30 @@
 | 红米 K90 | `annibale` | OS3.0.307.0.WPKCNXM | ✅ 完整验证 |
 | 红米 K80 Pro | - | 6.6.77 | ✅ 测试通过 |
 
-同一 6.6.77 内核版本的小米 / 红米机型基本可用（已实测 K90 与 K80 Pro）。`images/boot_6.6.77_v33_sysvipc.img` 可直接刷入。
+同一 6.6.77 内核版本的小米 / 红米机型基本可用。
 
-## 📥 下载
+## 🚀 下载与刷入
 
-- 预编译镜像 / AK3 刷机包：查看 [Releases](https://github.com/wanwanQWQ/xiaomi-6.6.77-kernel/releases)（每次云端构建成功后自动发布）
-- 最新构建产物：仓库 **Actions** 页面的 `kernel-Image-6.6.77` 工件
+每次云端构建成功后，成品会自动发布到 [Releases](https://github.com/wanwanQWQ/xiaomi-6.6.77-kernel/releases)。
 
-## 🚀 快速开始（云端构建）
+**方式一：fastboot**
 
-无需本地环境，GitHub 云端自动完成：拉取源码 → 打补丁 → 配置 → 编译 → CRC 修复 → 模拟器验证。
-
-```text
-1. 打开仓库 [Releases](https://github.com/wanwanQWQ/xiaomi-6.6.77-kernel/releases) 页面
-2. 下载 `boot_6.6.77_v33_sysvipc.img`（已拼接好，直接可用，小米 / 红米通用）
-3. 刷入（无需自己拼接）
-```
+下载 `boot_6.6.77_v33_sysvipc.img`（已拼接好，可直接刷入）：
 
 ```bash
-# 刷入
 adb reboot bootloader
+fastboot getvar current-slot        # 期望 a
 fastboot flash boot_a boot_6.6.77_v33_sysvipc.img
 fastboot reboot
 ```
 
-> 拼接方法适用于任意设备：把任意原厂 boot.img 与 Image 用 `scripts/splice_boot.py` 拼接即可。
-> 仓库的自动拼接使用 `images/stock_boot.img`（当前为 K90）；想为自己的机型生成免拼接镜像，放入该机型原厂 boot.img 后重新构建即可，或直接使用 AK3 刷机包。
-> 预拼接好的 `boot_6.6.77_v33_sysvipc.img` 可以直接发给其他用户刷入（小米 / 红米通用）。
+**方式二：AnyKernel3**
 
-## 💾 刷机与恢复
+下载 `kernel-6.6.77-ak3.zip`，在 TWRP / OrangeFox / KernelFlasher 中直接刷入（已实测 K90）。
 
-```bash
-# 查看当前槽位（期望 a）
-fastboot getvar current-slot
+**恢复方法**：长按电源 + 音量下进入 fastboot，刷回原厂 boot.img 即可。
 
-# 刷入镜像
-fastboot flash boot_a boot_custom.img
-fastboot reboot
-```
-
-**恢复方法**：长按电源 + 音量下进入 fastboot，重新刷回原厂 boot.img 即可。
-
-> ⚠️ 刷机有风险，请先备份数据，确认设备型号与内核版本后再操作。
-
-## 📦 AnyKernel3 刷入（Recovery / KernelFlasher）
-
-仓库自带 AK3 刷机包：`images/kernel-6.6.77-ak3.zip`（内含 v33 Image，已配置高通 A/B 设备通用参数）。
-
-✅ 已实测通过：在红米 K90 上刷入并正常开机（root / SYSVIPC / WiFi 均正常）。
-
-**方式一：Recovery 刷入**
-
-```text
-1. 进入 TWRP / OrangeFox 等 Recovery
-2. Install → 选择 kernel-6.6.77-ak3.zip
-3. 刷入完成后重启
-```
-
-**方式二：KernelFlasher 应用**
-
-```text
-1. 安装 KernelFlasher
-2. Flash → 选择 kernel-6.6.77-ak3.zip
-3. 等待刷入完成并重启
-```
-
-> 提示：
-> - 需要已解锁 Bootloader
-> - GKI 机型可能没有可用的 TWRP，优先使用 KernelFlasher 或 fastboot 方式
-> - AK3 会自动按当前槽位刷入 boot_a / boot_b
-> - 自制刷机包：下载 [AnyKernel3](https://github.com/osm0sis/AnyKernel3) 模板，把 `Image` 放入根目录，参考 `scripts/ak3_anykernel.sh` 修改配置后打包
+> ⚠️ 刷机有风险，请先备份数据；需要已解锁 Bootloader。
 
 ## ⚙️ 技术要点
 
@@ -118,7 +72,7 @@ scripts/
 images/
   boot_6.6.77_v33_sysvipc.img              v33 镜像（fastboot 刷入，MD5 9faf6bcce6116cc05c7902fc6dc01581）
   kernel-6.6.77-ak3.zip                    AK3 刷机包（Recovery / KernelFlasher 刷入）
-  stock_boot.img                           原厂 boot（默认 K90，可替换为任意机型用于自动拼接）
+  stock_boot.img                           原厂 boot（供自动拼接，可替换为其它机型）
 .github/workflows/build.yml                GitHub Actions 云端构建
 ```
 
@@ -137,12 +91,11 @@ bash /path/to/scripts/build.sh
 
 ```bash
 ls /proc/sysvipc/                   # 应看到 msg / sem / shm
-readlink /proc/self/ns/pid          # 命名空间（需 root）
+readlink /proc/self/ns/pid          # 命名空间
 cmd wifi status                     # WiFi 状态
-su -c id                            # root（已刷 FolkPatch 时）
 ```
 
-K90 实测结果：SYSVIPC ✅ · 命名空间 ✅ · WiFi（Wi-Fi 6，2401Mbps）✅ · root ✅。
+K90 实测结果：SYSVIPC ✅ · 命名空间 ✅ · WiFi（Wi-Fi 6，2401Mbps）✅
 
 ## ❓ 常见问题
 
