@@ -33,7 +33,7 @@ PATCH_VBMETA_FLAG=auto;
 . tools/ak3-core.sh;
 
 # boot install
-dump_boot;
+split_boot; # kernel-only boot (init_boot device): skip ramdisk unpack
 
-write_boot;
+flash_boot; # skip ramdisk repack
 ## end boot install
