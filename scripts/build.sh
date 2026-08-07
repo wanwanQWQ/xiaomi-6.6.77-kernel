@@ -1,52 +1,27 @@
 #!/bin/bash
+# 本地构建脚本（v33：SYSVIPC + 完整命名空间 + task_struct 布局修复 + 原厂 CRC 表）
+#
+# 环境要求：
+#   - Linux / WSL
+#   - clang-18 工具链（clang / ld.lld / llvm-* 已装入 PATH）
+#   - ACK 6.6.77 源码位于 /build/common
+#   - 参考（v16/原厂 CRC）构建产物位于 /build/out-v16/vmlinux
+#   - 原厂 boot.img 位于 /build/stock/boot.img（打包时使用，可选）
 set -e
+
 cd /build/common
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-echo "=== move SYSVIPC fields to end of task_struct ==="
+echo "=== apply task_struct patch ==="
 if grep -q 'SysV IPC per-task state' include/linux/sched.h; then
-  echo "sched.h already patched correctly"
-elif grep -q 'Moved to the end of task_struct' include/linux/sched.h; then
-  python3 /mnt/c/Users/Administrator/Documents/Codex/2026-08-06/ni-2/work/kbuild_fix_sched_patch.py
+  echo "sched.h already patched, skip"
 else
-  python3 - <<'PYEOF'
-path = 'include/linux/sched.h'
-s = open(path).read()
-
-old_block = '''#ifdef CONFIG_SYSVIPC
-	struct sysv_sem			sysvsem;
-	struct sysv_shm			sysvshm;
-#endif
-'''
-assert old_block in s, 'mid-struct SYSVIPC block not found'
-s = s.replace(old_block, '', 1)
-
-anchor = '''	/*
-	 * New fields for task_struct should be added above here, so that
-	 * they are included in the randomized portion of task_struct.
-	 */
-	randomized_struct_fields_end'''
-new_block = '''	/*
-	 * New fields for task_struct should be added above here, so that
-	 * they are included in the randomized portion of task_struct.
-	 */
-#ifdef CONFIG_SYSVIPC
-	/*
-	 * SysV IPC per-task state, placed at the end of the randomized
-	 * region so every other field keeps the same offset as a
-	 * !CONFIG_SYSVIPC build (prebuilt vendor modules depend on it).
-	 */
-	struct sysv_sem			sysvsem;
-	struct sysv_shm			sysvshm;
-#endif
-	randomized_struct_fields_end'''
-assert anchor in s, 'task_struct anchor not found'
-s = s.replace(anchor, new_block, 1)
-open(path, 'w').write(s)
-print('sched.h patched')
-PYEOF
+  git apply --check "$SCRIPT_DIR/../patches/sched-sysvipc-fields-to-end.patch"
+  git apply "$SCRIPT_DIR/../patches/sched-sysvipc-fields-to-end.patch"
+  echo "patch applied"
 fi
 
-echo "=== config (v33: SYSVIPC + task_struct layout preserved) ==="
+echo "=== config (SYSVIPC + namespaces) ==="
 make ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- O=/build/out-v33 gki_defconfig > /build/defconfig_v33.log 2>&1
 ./scripts/config --file /build/out-v33/.config \
   -d CONFIG_TRIM_UNUSED_KSYMS \
@@ -63,48 +38,42 @@ make ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- O=/build/out-v33 gki_def
 make ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- O=/build/out-v33 olddefconfig > /build/olddefconfig_v33.log 2>&1
 grep -E 'CONFIG_(SYSVIPC|MODVERSIONS|RANDSTRUCT)' /build/out-v33/.config
 
-echo "=== build ==="
-make ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- O=/build/out-v33 -j12 Image > /build/build_v33.log 2>&1 || { echo "BUILD FAILED"; tail -30 /build/build_v33.log; exit 1; }
+echo "=== build Image ==="
+make ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- O=/build/out-v33 -j"$(nproc)" Image > /build/build_v33.log 2>&1 || {
+  echo "BUILD FAILED"; tail -30 /build/build_v33.log; exit 1; }
 echo "BUILD OK"
 
-echo "=== patch CRC table to v16 values ==="
-python3 /mnt/c/Users/Administrator/Documents/Codex/2026-08-06/ni-2/work/kbuild_patch_crc2.py \
+echo "=== patch CRC table to stock values ==="
+python3 "$SCRIPT_DIR/patch_crc_from_vmlinux.py" \
   /build/out-v16/vmlinux /build/out-v33/vmlinux /build/out-v33/vmlinux_patched
 cp /build/out-v33/vmlinux_patched /build/out-v33/vmlinux
 make ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- O=/build/out-v33 Image > /build/rebuild_v33.log 2>&1
 ls -la /build/out-v33/arch/arm64/boot/Image
 
-echo "=== QEMU module load test ==="
-timeout 50 qemu-system-aarch64 -M virt -cpu max -m 2G \
-  -kernel /build/out-v33/arch/arm64/boot/Image \
-  -initrd /build/initramfs.cpio.gz \
-  -nographic -no-reboot \
-  -append "console=ttyAMA0 loglevel=8 rdinit=/init panic=-1" \
-  > /build/qemu_v33.log 2>&1 || true
-grep -E 'finit_module|===|Unknown symbol|version magic|disagrees|module verification|cfg80211|rfkill' /build/qemu_v33.log | head -20
+echo "=== QEMU module load test (optional) ==="
+if [ -f /build/initramfs.cpio.gz ]; then
+  timeout 50 qemu-system-aarch64 -M virt -cpu max -m 2G \
+    -kernel /build/out-v33/arch/arm64/boot/Image \
+    -initrd /build/initramfs.cpio.gz \
+    -nographic -no-reboot \
+    -append "console=ttyAMA0 loglevel=8 rdinit=/init panic=-1" \
+    > /build/qemu_v33.log 2>&1 || true
+  grep -E 'finit_module|===|Unknown symbol|version magic|disagrees|module verification|cfg80211|rfkill' /build/qemu_v33.log | head -20
+else
+  echo "initramfs not found, skip QEMU test"
+fi
 
-echo "=== splice ==="
-python3 - <<'PYEOF'
-import struct
-stock = '/build/stock/boot.img'
-kernel = '/build/out-v33/arch/arm64/boot/Image'
-out = '/build/boot_v33_splice.img'
-with open(stock, 'rb') as f:
-    img = bytearray(f.read())
-with open(kernel, 'rb') as f:
-    k = f.read()
-OFF = 0x1000
-AVB0 = 0x22B5000
-print('kernel size:', len(k), hex(len(k)))
-assert OFF + len(k) < AVB0
-img[8:12] = struct.pack('<I', len(k))
-img[OFF:OFF+len(k)] = k
-with open(out, 'wb') as f:
-    f.write(img)
-with open(out, 'rb') as f:
-    f.seek(AVB0)
-    assert f.read(4) == b'AVB0'
-print('written:', out)
-PYEOF
-cp /build/boot_v33_splice.img /mnt/c/Users/Administrator/Documents/Codex/2026-08-06/ni-2/outputs/boot_6.6.77_K90_v33_sysvipc.img
-md5sum /build/boot_v33_splice.img
+echo "=== splice boot image ==="
+if [ -f /build/stock/boot.img ]; then
+  python3 "$SCRIPT_DIR/splice_boot.py" \
+    /build/stock/boot.img \
+    /build/out-v33/arch/arm64/boot/Image \
+    /build/boot_v33_splice.img
+  mkdir -p "$SCRIPT_DIR/../images"
+  cp /build/boot_v33_splice.img "$SCRIPT_DIR/../images/boot_6.6.77_v33_sysvipc.img"
+  md5sum /build/boot_v33_splice.img
+else
+  echo "stock boot.img not found, skip splice"
+fi
+
+echo "DONE"
