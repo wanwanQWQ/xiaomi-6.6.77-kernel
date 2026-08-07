@@ -4,6 +4,10 @@
 
 由 AI 辅助创作。
 
+![Build](https://github.com/wanwanQWQ/xiaomi-6.6.77-kernel/actions/workflows/build.yml/badge.svg)
+
+仓库：<https://github.com/wanwanQWQ/xiaomi-6.6.77-kernel>
+
 ## 已测试
 
 - 红米 K90（`annibale`）✅
@@ -58,11 +62,11 @@ bash /path/to/scripts/kbuild_v33_schedmove.sh
 
 ## GitHub Actions 云端构建
 
-不需要本地环境，直接在 GitHub 云端编译：
+不需要本地环境，直接在 GitHub 云端编译（免费）。构建内容与本地 v33 完全一致：同版本源码（commit `4a507830d890`）→ 同补丁 → 同配置 → 同 CRC 表修复。
 
 1. 打开仓库的 **Actions** 页面
 2. 左侧选择 **Build Kernel**，点击 **Run workflow**
-3. 等待约 1～2 小时（免费公共仓库，无需任何费用）
+3. 等待约 1～2 小时
 4. 构建完成后在 **Artifacts** 下载 `kernel-Image-6.6.77`
 5. 解压得到 `Image`，用原厂 boot.img 拼接成可刷入的镜像：
 
@@ -77,8 +81,6 @@ adb reboot bootloader
 fastboot flash boot_a boot_custom.img
 fastboot reboot
 ```
-
-云端构建内容与本地 v33 完全一致：同版本源码（commit `4a507830d890`）→ 同补丁 → 同配置 → 同 CRC 表修复。
 
 ## 刷机
 
