@@ -140,7 +140,7 @@ K90 实测结果：SYSVIPC ✅ · 命名空间 ✅ · WiFi（Wi-Fi 6，2401Mbps�
 ## 🤝 开源致谢
 
 - [Droidspaces](https://github.com/ravindu644/Droidspaces-OSS) — 轻量级容器运行时
-- [FolkPatch](https://github.com/LyraVoid/FolkPatch) / [KernelSU](https://github.com/tiann/KernelSU) / [KernelPatch](https://github.com/bmax121/KernelPatch) — root 补丁与模块管理生态
+- [FolkPatch](https://github.com/LyraVoid/FolkPatch) / [KernelSU](https://github.com/tiann/KernelSU) — root 补丁与模块管理生态
 - [Android Common Kernel](https://android.googlesource.com/kernel/common/) — 内核源码基础
 - [LLVM / Clang](https://llvm.org/) — 交叉编译工具链
 
