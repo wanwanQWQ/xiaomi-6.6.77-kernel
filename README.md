@@ -1,4 +1,4 @@
-# 小米 / 红米 6.6.77 自定义内核
+# 小米 / 红米 6.6.77 内核（SYSVIPC + 命名空间）
 
 为小米 / 红米 6.6.77 内核设备打造的自定义内核：开启 **SYSVIPC** 与完整命名空间，完全兼容原厂预编译模块，专为 [Droidspaces](https://github.com/ravindu644/Droidspaces-OSS) 容器环境适配。
 
