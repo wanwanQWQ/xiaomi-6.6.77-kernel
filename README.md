@@ -112,10 +112,6 @@ K90 实测结果：SYSVIPC ✅ · 命名空间 ✅ · WiFi（Wi-Fi 6，2401Mbps�
 
 确认原厂 WiFi 驱动模块（vendor_dlkm）未被修改或替换，必要时重新刷入原厂模块分区。
 
-## 💬 社区交流
-
-Telegram：<https://t.me/+NfHztfyNBZs2ZDll>
-
 ## 🤝 开源致谢
 
 - [Droidspaces](https://github.com/ravindu644/Droidspaces-OSS) — 轻量级容器运行时
