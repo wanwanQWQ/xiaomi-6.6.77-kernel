@@ -5,7 +5,7 @@
 #   - Linux / WSL
 #   - clang-18 工具链（clang / ld.lld / llvm-* 已装入 PATH）
 #   - ACK 6.6.77 源码位于 /build/common
-#   - 参考（v16/原厂 CRC）构建产物位于 /build/out-v16/vmlinux
+#   - 参考 vmlinux 可选：存在则从它生成 CRC 表，缺失时自动使用仓库内 crc_table_stock.txt
 #   - 原厂 boot.img 位于 /build/stock/boot.img（打包时使用，可选）
 set -e
 
@@ -53,8 +53,15 @@ make ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- O=/build/out-v33 -j"$(np
 echo "BUILD OK"
 
 echo "=== patch CRC table to stock values ==="
-python3 "$SCRIPT_DIR/patch_crc_from_vmlinux.py" \
-  /build/out-v16/vmlinux /build/out-v33/vmlinux /build/out-v33/vmlinux_patched
+if [ -f /build/out-v16/vmlinux ]; then
+  echo "using reference vmlinux: /build/out-v16/vmlinux"
+  python3 "$SCRIPT_DIR/patch_crc_from_vmlinux.py" \
+    /build/out-v16/vmlinux /build/out-v33/vmlinux /build/out-v33/vmlinux_patched
+else
+  echo "reference vmlinux not found, using committed stock CRC table"
+  python3 "$SCRIPT_DIR/patch_crc_table.py" \
+    /build/out-v33/vmlinux "$SCRIPT_DIR/crc_table_stock.txt" /build/out-v33/vmlinux_patched
+fi
 cp /build/out-v33/vmlinux_patched /build/out-v33/vmlinux
 make ARCH=arm64 LLVM=1 CROSS_COMPILE=aarch64-linux-gnu- O=/build/out-v33 Image > /build/rebuild_v33.log 2>&1
 ls -la /build/out-v33/arch/arm64/boot/Image
